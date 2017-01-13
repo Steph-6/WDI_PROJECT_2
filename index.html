@@ -6,13 +6,40 @@
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"
 integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
 crossorigin="anonymous"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS6aR9Ini0ffsm6TmMnX3u3GWRVTadsbI" charset="utf-8"></script>
+  <script src="src/js/markerclusterer.js"></script>
+
+<!-- <script type="text/javascript"
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS6aR9Ini0ffsm6TmMnX3u3GWRVTadsbI&libraries=visualization">
+</script> -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS6aR9Ini0ffsm6TmMnX3u3GWRVTadsbI&libraries=places" charset="utf-8"></script>
     <script src="/js/app.js" charset="utf-8"></script>
     <link rel="stylesheet" href="/css/style.css">
 
   </head>
   <body>
     <h1>Map - [directions][my location]</h1>
-    <div id="map-canvas"></div>
+
+
+      <!-- form for submit> -->
+      <input id="origin-input" class="controls input" type="text"
+          placeholder="Enter an origin">
+
+      <input id="destination-input" class="controls input" type="text"
+          placeholder="Enter a destination">
+
+
+
+      <!-- <div id="mode-selector" class="controls">
+        <input type="radio" name="type" id="changemode-walking" checked="checked">
+        <label for="changemode-walking">Walking</label>
+
+        <input type="radio" name="type" id="changemode-transit">
+        <label for="changemode-transit">Transit</label>
+
+        <input type="radio" name="type" id="changemode-driving">
+        <label for="changemode-driving">Driving</label>
+      </div> -->
+    <div id="map-canvas">
+    </div>
   </body>
 </html>
