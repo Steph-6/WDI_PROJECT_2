@@ -1,10 +1,8 @@
 const express    = require('express');
 const app        = express();
 const mongoose   = require('mongoose');
-mongoose.Promise = global.Promise;
+// mongoose.Promise = global.Promise;
 const cors       = require('cors');
-// const rp         = require('request-promise');
-// const Crime      = require('./models/crime');
 
 const config = require('./config/config');
 const routes = require('./config/routes');

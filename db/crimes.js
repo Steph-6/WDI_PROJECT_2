@@ -22,7 +22,9 @@ rp(url)
       return Crime
         .create({
           lat: crime.location.latitude,
-          lng: crime.location.longitude
+          lng: crime.location.longitude,
+          category: crime.category,
+          month: crime.month
         });
     });
   })

@@ -1,9 +1,39 @@
 body {
   margin: 0;
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
 }
+
 
 #map-canvas {
   width: 100%;
-  height: 100vh;
+  height: 92vh;
   margin: 0 auto;
+  margin-top: -43px;
+}
+
+.navbar-inverse {
+  background-color: #353535;
+  border: solid #777777 4px;
+  border-radius: 0px;
+}
+
+form-group {
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+  font-size: 10px;
+  width: 200px;
+  height: 10px;
+  border-radius: 0px;
+}
+
+navbar {
+  position: absolute;
+}
+
+button {
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+#info {
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+  font-size: 15px;
 }
