@@ -6,12 +6,9 @@
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"
 integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
 crossorigin="anonymous"></script>
-  <script src="src/js/markerclusterer.js"></script>
-
-<!-- <script type="text/javascript"
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS6aR9Ini0ffsm6TmMnX3u3GWRVTadsbI&libraries=visualization">
-</script> -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCS6aR9Ini0ffsm6TmMnX3u3GWRVTadsbI&libraries=places" charset="utf-8"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="/js/app.js" charset="utf-8"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/style.css">
@@ -44,7 +41,9 @@ crossorigin="anonymous"></script>
                 <input type="text" id="origin-input" class="form-control controls input" placeholder="Enter an origin">
                 <input type="text" id="destination-input"  class="form-control controls input" placeholder="Enter a destination">
               </div>
-              <button type="submit" class="btn btn-default">Get    Directions</button>
+              <button type="submit" class="btn btn-default directions">Get Directions</button>
+              <button type="submit" class="btn btn-default home">Get Me Home</button>
+              <button type="submit" class="btn btn-default myLocation">My Location</button>
             </form>
           </div>
 
@@ -53,13 +52,25 @@ crossorigin="anonymous"></script>
           </ul>
           <ul class="nav navbar-nav navbar-left">
             <li><a href="#" class="glyphicon glyphicon-user"></a></li>
+            <li><a href="#" class="usersLogin">Login</a></li>
+            <li><a href="#" class="usersLogout">Logout</a></li>
+            <li><a href="#" class="usersNew">Register</a></li>
+            <li><a href="#" id="txt"></a><li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
     </nav>
     <hr />
+    <main class="container"></main>
+    <div class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
     <div id="map-canvas">
     </div>
+    <!-- <div id="directionsPanel" style="float:right;width:30%;height 100%"></div> -->
   </body>
 </html>
 
