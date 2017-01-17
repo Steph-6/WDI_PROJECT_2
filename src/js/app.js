@@ -59,6 +59,7 @@ App.init = function(){
   $('.usersLogout').on('click', App.logout);
 
   $('body').on('submit', '.usersNew', App.handleRegisterForm);
+  $('body').on('submit', '.usersLogin', App.handleLoginForm);
 
 
   if (App.getToken()) {
@@ -72,12 +73,12 @@ App.register = function(e){
   if (e) e.preventDefault();
   console.log('new');
   $('.modal-content').html(`
-    <form method="post" action="/register" class="usersNew">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Register</h4>
       </div>
       <div class="modal-body">
+      <form method="post" action="/register" class="usersNew">
         <div class="form-group">
           <label for="user_name">First Name</label>
           <input class="form-control" type="text" name="user[firstName]" id="user_firstName" placeholder="First Name">
@@ -102,19 +103,21 @@ App.register = function(e){
           <label for="user_passwordConfirmation">Password Confirmation</label>
           <input class="form-control" type="password" name="user[passwordConfirmation]" id="user_passwordConfirmation" placeholder="Password Confirmation">
         </div>
+          <button type="submit" class="btn btn-primary" value="register">Register</button>
+        </form>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" value="register">Register</button>
+
       </div>
-    </form>`);
+    `);
   $('.modal').modal('show');
   autocomplete(document.getElementById('user_home'));
 };
 
 App.handleRegisterForm = function(e){
   console.log('submitted');
-  e.preventDefault();
-  const data   = $(App).serialize();
+  if (e) e.preventDefault();
+  const data = $(this).serialize();
   $.ajax({
     url: '/register',
     method: 'post',
@@ -123,6 +126,7 @@ App.handleRegisterForm = function(e){
   }).done((data) => {
     if (data.token) App.setToken(data.token);
     App.loggedIn();
+    $('.modal').modal('hide');
   });
 };
 
@@ -153,14 +157,14 @@ App.removeToken = function(){
 };
 
 App.login = function(e){
-  e.preventDefault();
+  if (e) e.preventDefault();
   $('.modal-content').html(`
-    <form method="post" action="/login" class="usersLogin">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Login</h4>
       </div>
       <div class="modal-body">
+      <form method="post" action="/login" class="usersLogin">
       <div class="form-group">
         <label for="user_email">Email</label>
         <input class="form-control" type="text" name="user[email]" id="user_email" placeholder="Email Address">
@@ -169,17 +173,17 @@ App.login = function(e){
         <label for="user_password">Password</label>
         <input class="form-control" type="password" name="user[password]" id="user_password" placeholder="Password">
       </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+      </form>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Login</button>
       </div>
-    </form>`);
+    `);
   $('.modal').modal('show');
 };
 
 App.handleLoginForm = function(e){
-  console.log('logging in');
-  e.preventDefault();
-  const data   = $(App).serialize();
+  if (e) e.preventDefault();
+  const data   = $(this).serialize();
   $.ajax({
     url: '/login',
     method: 'post',
@@ -188,11 +192,12 @@ App.handleLoginForm = function(e){
   }).done((data) => {
     if (data.token) App.setToken(data.token);
     App.loggedIn();
+    $('.modal').modal('hide');
   });
 };
 
 App.logout = function(e){
-  e.preventDefault();
+  if (e) e.preventDefault();
   App.removeToken();
   App.loggedOut();
 };
@@ -207,7 +212,7 @@ App.loggedOut = function(){
 
 App.loggedIn = function(){
   //change glyphicon-user to username and 'it's'...
-  $('#message').html(`Welcome user, it's`);
+  $('#message').html(`Welcome ${user.firstName}, it's`);
   $('.usersLogin').hide();
   $('.usersNew').hide();
   $('.usersLogout').show();
@@ -217,18 +222,22 @@ App.loggedIn = function(){
 googleMap.getLights   = function() {
   $.get('http://localhost:3000/lights').done(data => {
     data.forEach(light => {
-      new google.maps.Marker({
-        position: { lat: Number(light.lat), lng: Number(light.lng) },
-        map: this.map,
-        icon: {
-          url: '/images/Glow8.png',
-          scaledSize: new google.maps.Size(5,5),
-          origin: new google.maps.Point(0,0),
-          anchor: new google.maps.Point(0,0)
-        }
-      });
+      googleMap.createMarkers(light);
       //this.addHover(light, lightMarker);
     });
+  });
+};
+
+googleMap.createMarkers = function(light, icon) {
+  new google.maps.Marker({
+    position: { lat: Number(light.lat), lng: Number(light.lng) },
+    map: this.map,
+    icon: {
+      url: icon ? icon : '/images/Glow8.png',
+      scaledSize: icon ? new google.maps.Size(20,20) : new google.maps.Size(5,5),
+      origin: new google.maps.Point(0,0),
+      anchor: new google.maps.Point(0,0)
+    }
   });
 };
 
@@ -265,7 +274,7 @@ googleMap.addInfoWindowForCrime = function(crime, crimeMarker) {
 };
 
 function calcRoute(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   const start = document.getElementById('origin-input').value;
   const end = document.getElementById('destination-input').value;
   const request = {
@@ -279,8 +288,14 @@ function calcRoute(e) {
       directionsDisplay.setDirections(result);
       const leg = result.routes[0].legs[0];
       console.log(leg);
-      makeMarker(leg.start_location, icons.start, 'title');
-      makeMarker(leg.end_location, icons.end, 'title');
+      googleMap.createMarkers({
+        lat: leg.start_location.lat(),
+        lng: leg.start_location.lng()
+      }, './images/person2.png');
+      googleMap.createMarkers({
+        lat: leg.end_location.lat(),
+        lng: leg.end_location.lng()
+      }, './images/home.png');
     } else {
       window.alert('Directions request failed due to ' + status);
     }
@@ -307,38 +322,6 @@ function calcRoute(e) {
 //   });
 // }
 
-function makeMarker(position, icon, title) {
-  new google.maps.Marker({
-    position: position,
-    icon: icon,
-    title: title,
-    setMap: googleMap
-  });
-}
-
-const icons = {
-  start: new google.maps.MarkerImage(
-   // URL
-   'images/person2.png'
-   // (width,height)
-  //  new google.maps.Size(30, 30),
-  //  // The origin point (x,y)
-  //  new google.maps.Point(0, 0),
-  //  // The anchor point (x,y)
-  //  new google.maps.Point(22, 32)
-  ),
-  end: new google.maps.MarkerImage(
-   // URL
-   'images/home.png'
-  //  // (width,height)
-  //  new google.maps.Size(30, 30),
-  //  // The origin point (x,y)
-  //  new google.maps.Point(0, 0),
-  //  // The anchor point (x,y)
-  //  new google.maps.Point(22, 32)
-  )
-};
-
 function autocomplete(input){
   const defaultBounds = new google.maps.LatLngBounds(
     new google.maps.LatLng(52.957699,-1.265336));
@@ -347,17 +330,6 @@ function autocomplete(input){
 }
 
 $(googleMap.mapSetup.bind(googleMap));
-
-// const crimeMarker = new google.maps.Marker({
-//   position: { lat: Number(crime.lat), lng: Number(crime.lng) },
-//   map: this.map,
-//   //set time out for lights appearing
-//   icon: {
-//     url: 'images/red2.png',
-//     scaledSize: new google.maps.Size(10,10),
-//     origin: new google.maps.Point(0,0),
-//     anchor: new google.maps.Point(0,0)
-//   }
 
 function startTime() {
   const today = new Date();
