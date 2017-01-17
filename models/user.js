@@ -21,6 +21,14 @@ userSchema
   .path('passwordHash')
   .validate(validatePasswordHash);
 
+userSchema.set('toJSON',{
+  transform: function(doc, ret) {
+    delete ret.passwordHash;
+    delete ret.__v;
+    return ret;
+  }
+});
+
 userSchema.methods.validatePassword = validatePassword;
 
 module.exports = mongoose.model('User', userSchema);
