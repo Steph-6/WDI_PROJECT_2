@@ -234,7 +234,7 @@ googleMap.createMarkers = function(light, icon) {
     map: this.map,
     icon: {
       url: icon ? icon : '/images/Glow8.png',
-      scaledSize: icon ? new google.maps.Size(20,20) : new google.maps.Size(5,5),
+      scaledSize: icon ? new google.maps.Size(60,40) : new google.maps.Size(5,5),
       origin: new google.maps.Point(0,0),
       anchor: new google.maps.Point(0,0)
     }
@@ -287,7 +287,6 @@ function calcRoute(e) {
     if (status === 'OK') {
       directionsDisplay.setDirections(result);
       const leg = result.routes[0].legs[0];
-      console.log(leg);
       googleMap.createMarkers({
         lat: leg.start_location.lat(),
         lng: leg.start_location.lng()
