@@ -3,6 +3,7 @@ const google    = google;
 let directionsDisplay;
 const directionsService = new google.maps.DirectionsService();
 const App = App || {};
+// const User = require('../controllers/users')
 
 googleMap.mapSetup  = function() {
   directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
@@ -66,7 +67,7 @@ App.init = function(){
   }
 };
 
-App.register = function(e){
+App.register           = function(e){
   if (e) e.preventDefault();
   console.log('new');
   $('.modal-content').html(`
@@ -124,19 +125,19 @@ App.handleRegisterForm = function(e){
   });
 };
 
-App.setRequestHeader = function(xhr) {
+App.setRequestHeader   = function(xhr) {
   return xhr.setRequestHeader('Authorization', `Bearer ${App.getToken()}`);
 };
 
-App.setToken         = function(token){
+App.setToken           = function(token){
   return window.localStorage.setItem('token', token);
 };
 
-App.getToken         = function(){
+App.getToken           = function(){
   return window.localStorage.getItem('token');
 };
 
-App.removeToken      = function(){
+App.removeToken        = function(){
   return window.localStorage.clear();
 };
 
@@ -178,7 +179,7 @@ App.handleLoginForm = function(e){
   });
 };
 
-App.logout = function(e){
+App.logout    = function(e){
   if (e) e.preventDefault();
   App.removeToken();
   App.loggedOut();
@@ -190,12 +191,28 @@ App.loggedOut = function(){
   $('.usersNew').show();
   $('.usersLogout').hide();
   $('.home').hide();
-  showInfoModal();
 };
 
-App.loggedIn = function(){
+App.loggedIn  = function(){
+
+  const token   = App.getToken();
+  const payload = token.split('.')[1];
+  const decoded = JSON.parse(window.atob(payload));
+  const userId  = decoded.userId;
+
+  $
+    .get(`http://localhost:3000/users/${userId}`)
+    .done(data => App.currentUser = data);
+
+
   //change glyphicon-user to username and 'it's'...
   // $('#message').html(`Welcome ${firstName}, it's`);
+  // $.ajax('/users','get', data => {
+  //   console.log('got');
+  //   $.each(data.users, (i, user) => {
+  //     $('#txt').html(data.users, user.firstName);
+  //   });
+  // });
   $('.usersLogin').hide();
   $('.usersNew').hide();
   $('.usersLogout').show();
@@ -212,19 +229,34 @@ googleMap.getLights   = function() {
 };
 
 googleMap.createMarkers = function(light, icon) {
-  new google.maps.Marker({
+  const marker = new google.maps.Marker({
     position: { lat: Number(light.lat), lng: Number(light.lng) },
     map: this.map,
+    shape: { coords: [17,17,18],type: 'circle'},
     icon: {
       url: icon ? icon : '/images/Glow8.png',
       scaledSize: icon ? new google.maps.Size(60,40) : new google.maps.Size(5,5),
       origin: new google.maps.Point(0,0),
-      anchor: new google.maps.Point(0,0)
+      anchor: new google.maps.Point(0,0),
+      optimized: false
     }
   });
+  setTimeout(function() {
+    $('.loading').hide();
+    showInfoModal();
+  }, 2000);
+  // google.maps.event.addListener(marker,'mouseover',function(){
+  //   console.log('mouseover');
+  //   console.log(this.icon);
+  //   // $('img[src="'+this.icon+'"]').addClass('lightUp');
+  //   // console.log($('img[src="'+this.icon+'"]'));
+  // });
+
+
 };
 
 googleMap.getCrimes = function() {
+  $('.loading').show();
   $.get('http://localhost:3000/crimes').done(data => {
     data.forEach(crime => {
       const crimeMarker = new google.maps.Marker({
@@ -287,8 +319,7 @@ function calcRoute(e) {
 function calcRouteHome(e) {
   if (e) e.preventDefault();
   const start = $('#user_location').val();
-  const end = 'Arboretum Street, Nottingham, United Kingdom';
-  console.log();
+  const end   = App.currentUser.home;
   const request = {
     origin: start,
     destination: end,

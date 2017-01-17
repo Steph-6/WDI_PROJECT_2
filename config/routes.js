@@ -20,5 +20,7 @@ router.route('/login')
   .post(authentications.login);
 router.route('/users')
   .get(usersController.index);
+router.route('/users/:id')
+  .get(usersController.show);
 
 module.exports = router;
