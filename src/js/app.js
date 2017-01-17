@@ -6,7 +6,12 @@ const App = App || {};
 // const User = require('../controllers/users')
 
 googleMap.mapSetup  = function() {
-  directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
+  directionsDisplay = new google.maps.DirectionsRenderer({
+    suppressMarkers: true,
+    polylineOptions: {
+      strokeColor: 'red'
+    }
+  });
   const zoom        = 15;
   const canvas      = document.getElementById('map-canvas');
   const center      = new google.maps.LatLng(52.956163, -1.159425);
@@ -52,6 +57,7 @@ App.init = function(){
   $('.directions').on('click', calcRoute);
   $('.navbar-brand').on('click', showInfoModal);
   $('.home').on('click', locate);
+  $('.glyphicon-user').on('click', welcomeMessage);
 
   $('.usersNew').on('click', App.register);
   $('.usersLogin').on('click', App.login);
@@ -59,8 +65,11 @@ App.init = function(){
   $('body').on('submit', '.usersNew', App.handleRegisterForm);
   $('body').on('submit', '.usersLogin', App.handleLoginForm);
   $('body').on('submit', '.usersLocate', calcRouteHome);
+  $('body').on('click', '.btn-locate', getLocation);
+
 
   if (App.getToken()) {
+
     App.loggedIn();
   } else {
     App.loggedOut();
@@ -193,31 +202,28 @@ App.loggedOut = function(){
   $('.home').hide();
 };
 
-App.loggedIn  = function(){
+App.loggedIn    = function(){
 
   const token   = App.getToken();
   const payload = token.split('.')[1];
   const decoded = JSON.parse(window.atob(payload));
   const userId  = decoded.userId;
 
-  $
-    .get(`http://localhost:3000/users/${userId}`)
-    .done(data => App.currentUser = data);
-
+  $.get(`http://localhost:3000/users/${userId}`)
+   .done(data => App.currentUser = data);
 
   //change glyphicon-user to username and 'it's'...
-  // $('#message').html(`Welcome ${firstName}, it's`);
-  // $.ajax('/users','get', data => {
-  //   console.log('got');
-  //   $.each(data.users, (i, user) => {
-  //     $('#txt').html(data.users, user.firstName);
-  //   });
-  // });
+  // $('#message').html(`Welcome ${App.currentUser.firstName}, it's`);
   $('.usersLogin').hide();
   $('.usersNew').hide();
   $('.usersLogout').show();
   $('.home').show();
 };
+
+function welcomeMessage(){
+  $('#message').html(`Hey ${App.currentUser.firstName} it\'s`);
+  $('.glyphicon-user').hide();
+}
 
 googleMap.getLights   = function() {
   $.get('http://localhost:3000/lights').done(data => {
@@ -229,7 +235,7 @@ googleMap.getLights   = function() {
 };
 
 googleMap.createMarkers = function(light, icon) {
-  const marker = new google.maps.Marker({
+  new google.maps.Marker({
     position: { lat: Number(light.lat), lng: Number(light.lng) },
     map: this.map,
     shape: { coords: [17,17,18],type: 'circle'},
@@ -251,9 +257,9 @@ googleMap.createMarkers = function(light, icon) {
   //   // $('img[src="'+this.icon+'"]').addClass('lightUp');
   //   // console.log($('img[src="'+this.icon+'"]'));
   // });
-
-
 };
+
+
 
 googleMap.getCrimes = function() {
   $('.loading').show();
@@ -290,6 +296,8 @@ googleMap.addInfoWindowForCrime = function(crime, crimeMarker) {
 
 function calcRoute(e) {
   if (e) e.preventDefault();
+  console.log(App.currentUser);
+  welcomeMessage();
   const start = document.getElementById('origin-input').value;
   const end = document.getElementById('destination-input').value;
   const request = {
@@ -310,6 +318,7 @@ function calcRoute(e) {
         lat: leg.end_location.lat(),
         lng: leg.end_location.lng()
       }, './images/home.png');
+
     } else {
       window.alert('Directions request failed due to ' + status);
     }
@@ -349,16 +358,15 @@ function showInfoModal() {
   $('.modal-content').html(`
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h3 class="modal-title">Info</h4>
+        <h3 class="modal-title">Welcome to NightMapper</h4>
       </div>
       <div class="modal-body">
-        <h4>Welcome to NightMapper</h4>
         <p>The app designed to make sure you get home safe.</p>
         <p>Register your home address and get a route home from your location by clicking "Get Home".
         Each yellow glow shows a streetlamp, stick to these roads, but try and avoid the red areas. This is where a crime has taken place in the past month.</p>
       </div>
       <div class="modal-footer">
-        <p>Made with ♥ by Steph Robinson.</p>
+        <p>Made with ♥ by Steph Robinson</p>
       </div>
     `);
   $('.modal').modal('show');
@@ -391,7 +399,7 @@ function checkTime(i) {
   return i;
 }
 
-const getCrimeInfo = function(crime) {
+function getCrimeInfo(crime) {
   let cat   = crime.category.replace(/-/g,' ');
   cat = cat.charAt(0).toUpperCase() + cat.slice(1);
   let month = crime.month.charAt(5) + crime.month.charAt(6);
@@ -423,7 +431,7 @@ const getCrimeInfo = function(crime) {
   }
   month = 'in ' + month + ' ' + crime.month.charAt(0) + crime.month.charAt(1) + crime.month.charAt(2) + crime.month.charAt(3) + '.';
   return `<div id='info'>${cat}, ${month}</div>`;
-};
+}
 
 function locate(e) {
   if (e) e.preventDefault();
@@ -435,13 +443,21 @@ function locate(e) {
       <div class="modal-body">
       <form method="post" action="/register" class="usersLocate">
       <div class="form-group">
-        <input class="form-control" type="text" name="user[location]" id="user_location" placeholder="Current Location">
+        <input class="form-control" type="text" name="user[location]" id="user_location" placeholder="Starting Point">
       </div>
       <button type="submit" class="btn btn-primary btn-modal">Submit</button>
+      <button type="submit" class="btn btn-primary btn-modal btn-locate">Use My Current Location</button>
       </form>
     `);
   $('.modal').modal('show');
   autocomplete(document.getElementById('user_location'));
+}
+
+function getLocation(e){
+  if (e) e.preventDefault();
+  window.alert('Can\'t find your current location.');
+  $('.modal').modal('hide');
+
   // const GeoMarker = new GeolocationMarker(googleMap);
   // if (navigator.geolocation) {
   //   navigator.geolocation.getCurrentPosition(function(position) {
@@ -453,18 +469,7 @@ function locate(e) {
   //   // Browser doesn't support Geolocation
   //   console.log('failed to get location');
   // }
-
 }
-
-// App.ajaxRequest = function(url, method, data, callback){
-//   return $.ajax({
-//     url,
-//     method,
-//     data,
-//     beforeSend: App.setRequestHeader
-//   })
-//   .done(callback);
-// };
 
 // draw my route
 // googleMap.addHover = function(light, lightMarker) {

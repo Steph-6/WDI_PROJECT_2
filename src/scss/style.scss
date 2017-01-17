@@ -11,9 +11,18 @@ body {
   margin-top: -41px;
 }
 
+#txt {
+  margin-left: -26px;
+}
+
 .btn-modal {
   background-color: #74A57F;
   border: solid #74A57F 2px;
+}
+
+.btn-modal:hover {
+  background-color: #ACBDBA;
+  border: solid #ACBDBA 2px;
 }
 
 .navbar-inverse {
