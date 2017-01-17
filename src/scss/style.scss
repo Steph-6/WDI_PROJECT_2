@@ -6,9 +6,14 @@ body {
 
 #map-canvas {
   width: 100%;
-  height: 91vh;
+  height: 92vh;
   margin: 0 auto;
-  margin-top: -42px;
+  margin-top: -41px;
+}
+
+.btn-modal {
+  background-color: #74A57F;
+  border: solid #74A57F 2px;
 }
 
 .navbar-inverse {
@@ -40,4 +45,11 @@ button {
 
 .pac-container {
   z-index: 1051 !important;
+}
+
+.modal-content {
+  background-color: #eeeeee;
+  -webkit-box-shadow: -1px 4px 142px 12px rgba(85,85,85,0.88);
+  -moz-box-shadow: -1px 4px 142px 12px rgba(85,85,85,0.88);
+  box-shadow: -1px 4px 142px 12px rgba(85,85,85,0.88);
 }

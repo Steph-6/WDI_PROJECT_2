@@ -2,9 +2,7 @@ const googleMap = googleMap || {};
 const google    = google;
 let directionsDisplay;
 const directionsService = new google.maps.DirectionsService();
-// const User = require('../models/user');
 const App = App || {};
-
 
 googleMap.mapSetup  = function() {
   directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
@@ -51,16 +49,15 @@ App.init = function(){
   App.url = 'http://localhost:7000/';
 
   $('.directions').on('click', calcRoute);
-  // $('.home').on('click', calcRouteHome);
-  // $('.mylocation').on('click', myLocation);
+  $('.navbar-brand').on('click', showInfoModal);
+  $('.home').on('click', locate);
 
   $('.usersNew').on('click', App.register);
   $('.usersLogin').on('click', App.login);
   $('.usersLogout').on('click', App.logout);
-
   $('body').on('submit', '.usersNew', App.handleRegisterForm);
   $('body').on('submit', '.usersLogin', App.handleLoginForm);
-
+  $('body').on('submit', '.usersLocate', calcRouteHome);
 
   if (App.getToken()) {
     App.loggedIn();
@@ -103,11 +100,8 @@ App.register = function(e){
           <label for="user_passwordConfirmation">Password Confirmation</label>
           <input class="form-control" type="password" name="user[passwordConfirmation]" id="user_passwordConfirmation" placeholder="Password Confirmation">
         </div>
-          <button type="submit" class="btn btn-primary" value="register">Register</button>
+          <button type="submit" class="btn btn-primary btn-modal" value="register">Register</button>
         </form>
-      </div>
-      <div class="modal-footer">
-
       </div>
     `);
   $('.modal').modal('show');
@@ -130,29 +124,19 @@ App.handleRegisterForm = function(e){
   });
 };
 
-// App.ajaxRequest = function(url, method, data, callback){
-//   return $.ajax({
-//     url,
-//     method,
-//     data,
-//     beforeSend: App.setRequestHeader
-//   })
-//   .done(callback);
-// };
-
 App.setRequestHeader = function(xhr) {
   return xhr.setRequestHeader('Authorization', `Bearer ${App.getToken()}`);
 };
 
-App.setToken = function(token){
+App.setToken         = function(token){
   return window.localStorage.setItem('token', token);
 };
 
-App.getToken = function(){
+App.getToken         = function(){
   return window.localStorage.getItem('token');
 };
 
-App.removeToken = function(){
+App.removeToken      = function(){
   return window.localStorage.clear();
 };
 
@@ -173,17 +157,15 @@ App.login = function(e){
         <label for="user_password">Password</label>
         <input class="form-control" type="password" name="user[password]" id="user_password" placeholder="Password">
       </div>
-      <button type="submit" class="btn btn-primary">Login</button>
+      <button type="submit" class="btn btn-primary btn-modal">Login</button>
       </form>
-      <div class="modal-footer">
-      </div>
     `);
   $('.modal').modal('show');
 };
 
 App.handleLoginForm = function(e){
   if (e) e.preventDefault();
-  const data   = $(this).serialize();
+  const data = $(this).serialize();
   $.ajax({
     url: '/login',
     method: 'post',
@@ -208,11 +190,12 @@ App.loggedOut = function(){
   $('.usersNew').show();
   $('.usersLogout').hide();
   $('.home').hide();
+  showInfoModal();
 };
 
 App.loggedIn = function(){
   //change glyphicon-user to username and 'it's'...
-  $('#message').html(`Welcome ${user.firstName}, it's`);
+  // $('#message').html(`Welcome ${firstName}, it's`);
   $('.usersLogin').hide();
   $('.usersNew').hide();
   $('.usersLogout').show();
@@ -301,25 +284,54 @@ function calcRoute(e) {
   });
 }
 
-// function calcRouteHome(e) {
-//   e.preventDefault();
-//   const start = document.getElementById('origin-input').value;
-//   // get the users home
-//   // const end = User.home;
-//   const request = {
-//     origin: start,
-//     destination: end,
-//     travelMode: 'WALKING',
-//     provideRouteAlternatives: true
-//   };
-//   directionsService.route(request, function(result, status) {
-//     if (status == 'OK') {
-//       directionsDisplay.setDirections(result);
-//     } else {
-//       window.alert('Directions request failed due to ' + status);
-//     }
-//   });
-// }
+function calcRouteHome(e) {
+  if (e) e.preventDefault();
+  const start = $('#user_location').val();
+  const end = 'Arboretum Street, Nottingham, United Kingdom';
+  console.log();
+  const request = {
+    origin: start,
+    destination: end,
+    travelMode: 'WALKING',
+    provideRouteAlternatives: true
+  };
+  directionsService.route(request, function(result, status) {
+    if (status === 'OK') {
+      directionsDisplay.setDirections(result);
+      const leg = result.routes[0].legs[0];
+      googleMap.createMarkers({
+        lat: leg.start_location.lat(),
+        lng: leg.start_location.lng()
+      }, './images/person2.png');
+      googleMap.createMarkers({
+        lat: leg.end_location.lat(),
+        lng: leg.end_location.lng()
+      }, './images/home.png');
+    } else {
+      window.alert('Directions request failed due to ' + status);
+    }
+  });
+  $('.modal').modal('hide');
+}
+
+function showInfoModal() {
+  $('.modal-content').html(`
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title">Info</h4>
+      </div>
+      <div class="modal-body">
+        <h4>Welcome to NightMapper</h4>
+        <p>The app designed to make sure you get home safe.</p>
+        <p>Register your home address and get a route home from your location by clicking "Get Home".
+        Each yellow glow shows a streetlamp, stick to these roads, but try and avoid the red areas. This is where a crime has taken place in the past month.</p>
+      </div>
+      <div class="modal-footer">
+        <p>Made with ♥ by Steph Robinson.</p>
+      </div>
+    `);
+  $('.modal').modal('show');
+}
 
 function autocomplete(input){
   const defaultBounds = new google.maps.LatLngBounds(
@@ -382,20 +394,45 @@ const getCrimeInfo = function(crime) {
   return `<div id='info'>${cat}, ${month}</div>`;
 };
 
-// const myLocation = function(e) {
-//   e.preventDefault();
-//   if (navigator.geolocation) {
-//     navigator.geolocation.getCurrentPosition(function(position) {
-//       const pos = {
-//         lat: position.coords.latitude,
-//         lng: position.coords.longitude
-//       };
-//       this.map.setCenter(pos);
-//     });
-//   } else {
-//     // Browser doesn't support Geolocation
-//     console.log('failed to get location');
-//   }
+function locate(e) {
+  if (e) e.preventDefault();
+  $('.modal-content').html(`
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Where are you at the moment?</h4>
+      </div>
+      <div class="modal-body">
+      <form method="post" action="/register" class="usersLocate">
+      <div class="form-group">
+        <input class="form-control" type="text" name="user[location]" id="user_location" placeholder="Current Location">
+      </div>
+      <button type="submit" class="btn btn-primary btn-modal">Submit</button>
+      </form>
+    `);
+  $('.modal').modal('show');
+  autocomplete(document.getElementById('user_location'));
+  // const GeoMarker = new GeolocationMarker(googleMap);
+  // if (navigator.geolocation) {
+  //   navigator.geolocation.getCurrentPosition(function(position) {
+  //     const latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+  //     googleMap.setZoom(19);
+  //     // googleMap.setCenter(latlng);
+  //   });
+  // } else {
+  //   // Browser doesn't support Geolocation
+  //   console.log('failed to get location');
+  // }
+
+}
+
+// App.ajaxRequest = function(url, method, data, callback){
+//   return $.ajax({
+//     url,
+//     method,
+//     data,
+//     beforeSend: App.setRequestHeader
+//   })
+//   .done(callback);
 // };
 
 // draw my route
