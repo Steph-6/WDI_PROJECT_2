@@ -9,7 +9,7 @@ googleMap.mapSetup  = function() {
   directionsDisplay = new google.maps.DirectionsRenderer({
     suppressMarkers: true,
     polylineOptions: {
-      strokeColor: 'red'
+      strokeColor: '#CDDDDD'
     }
   });
   const zoom        = 15;
@@ -234,23 +234,24 @@ googleMap.getLights   = function() {
   });
 };
 
-googleMap.createMarkers = function(light, icon) {
+googleMap.createMarkers = function(light, icon, anchor, size) {
   new google.maps.Marker({
     position: { lat: Number(light.lat), lng: Number(light.lng) },
     map: this.map,
     shape: { coords: [17,17,18],type: 'circle'},
     icon: {
       url: icon ? icon : '/images/Glow8.png',
-      scaledSize: icon ? new google.maps.Size(60,40) : new google.maps.Size(5,5),
+      scaledSize: icon ? size : new google.maps.Size(5,5),
       origin: new google.maps.Point(0,0),
-      anchor: new google.maps.Point(0,0),
+      anchor: icon ? anchor : new google.maps.Point(0,0),
+      zIndex: icon ? 1000000 : 5,
       optimized: false
     }
   });
-  setTimeout(function() {
-    $('.loading').hide();
-    showInfoModal();
-  }, 2000);
+  // setTimeout(function() {
+  //   // $('.loading').hide();
+  //   showInfoModal();
+  // }, 2000);
   // google.maps.event.addListener(marker,'mouseover',function(){
   //   console.log('mouseover');
   //   console.log(this.icon);
@@ -262,6 +263,7 @@ googleMap.createMarkers = function(light, icon) {
 
 
 googleMap.getCrimes = function() {
+  showInfoModal();
   $('.loading').show();
   $.get('http://localhost:3000/crimes').done(data => {
     data.forEach(crime => {
@@ -296,8 +298,6 @@ googleMap.addInfoWindowForCrime = function(crime, crimeMarker) {
 
 function calcRoute(e) {
   if (e) e.preventDefault();
-  console.log(App.currentUser);
-  welcomeMessage();
   const start = document.getElementById('origin-input').value;
   const end = document.getElementById('destination-input').value;
   const request = {
@@ -313,11 +313,11 @@ function calcRoute(e) {
       googleMap.createMarkers({
         lat: leg.start_location.lat(),
         lng: leg.start_location.lng()
-      }, './images/person2.png');
+      }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(50,50));
       googleMap.createMarkers({
         lat: leg.end_location.lat(),
         lng: leg.end_location.lng()
-      }, './images/home.png');
+      }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(50,50));
 
     } else {
       window.alert('Directions request failed due to ' + status);
@@ -342,11 +342,11 @@ function calcRouteHome(e) {
       googleMap.createMarkers({
         lat: leg.start_location.lat(),
         lng: leg.start_location.lng()
-      }, './images/person2.png');
+      }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(50,50));
       googleMap.createMarkers({
         lat: leg.end_location.lat(),
         lng: leg.end_location.lng()
-      }, './images/home.png');
+      }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(50,50));
     } else {
       window.alert('Directions request failed due to ' + status);
     }
@@ -363,7 +363,7 @@ function showInfoModal() {
       <div class="modal-body">
         <p>The app designed to make sure you get home safe.</p>
         <p>Register your home address and get a route home from your location by clicking "Get Home".
-        Each yellow glow shows a streetlamp, stick to these roads, but try and avoid the red areas. This is where a crime has taken place in the past month.</p>
+        Each <font style="color:#c59d00"><b>yellow</b></font> glow shows a streetlamp, stick to these road. Try to avoid the <font style="color:#C30005"><b>red</b></font> areas, this is where a crime has taken place in the past month.</p>
       </div>
       <div class="modal-footer">
         <p>Made with ♥ by Steph Robinson</p>
