@@ -60,16 +60,19 @@ App.init = function(){
   $('body').on('submit', '.usersLocate', calcRouteHome);
   $('body').on('click', '.btn-locate', getLocation);
 
-  checkToken();
+  App.checkToken();
 };
 
-function checkToken(){
+App.checkToken = function(){
+  console.log('checking');
   if (App.getToken()) {
+    console.log('loggedin');
     App.loggedIn();
   } else {
+    console.log('loggedout');
     App.loggedOut();
   }
-}
+};
 
 App.register           = function(e){
   if (e) e.preventDefault();
@@ -122,24 +125,25 @@ App.handleRegisterForm = function(e){
     beforeSend: App.setRequestHeader
   }).done((data) => {
     if (data.token) App.setToken(data.token);
-    checkToken();
     $('.modal').modal('hide');
+    App.checkToken();
   });
 };
 
-App.setRequestHeader   = function(xhr) {
+App.setRequestHeader = function(xhr) {
+  console.log('setting request header');
   return xhr.setRequestHeader('Authorization', `Bearer ${App.getToken()}`);
 };
 
-App.setToken           = function(token){
+App.setToken = function(token){
   return window.localStorage.setItem('token', token);
 };
 
-App.getToken           = function(){
+App.getToken = function(){
   return window.localStorage.getItem('token');
 };
 
-App.removeToken        = function(){
+App.removeToken = function(){
   return window.localStorage.clear();
 };
 
@@ -176,8 +180,8 @@ App.handleLoginForm = function(e){
     beforeSend: App.setRequestHeader
   }).done((data) => {
     if (data.token) App.setToken(data.token);
-    checkToken();
     $('.modal').modal('hide');
+    App.checkToken();
   });
 };
 
@@ -193,6 +197,7 @@ App.loggedOut = function(){
   $('.usersNew').show();
   $('.usersLogout').hide();
   $('.home').hide();
+  // App.checkToken();
 };
 
 App.loggedIn    = function(){
