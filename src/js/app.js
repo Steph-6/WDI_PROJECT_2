@@ -60,12 +60,16 @@ App.init = function(){
   $('body').on('submit', '.usersLocate', calcRouteHome);
   $('body').on('click', '.btn-locate', getLocation);
 
+  checkToken();
+};
+
+function checkToken(){
   if (App.getToken()) {
     App.loggedIn();
   } else {
     App.loggedOut();
   }
-};
+}
 
 App.register           = function(e){
   if (e) e.preventDefault();
@@ -118,7 +122,7 @@ App.handleRegisterForm = function(e){
     beforeSend: App.setRequestHeader
   }).done((data) => {
     if (data.token) App.setToken(data.token);
-    App.loggedIn();
+    checkToken();
     $('.modal').modal('hide');
   });
 };
@@ -172,7 +176,7 @@ App.handleLoginForm = function(e){
     beforeSend: App.setRequestHeader
   }).done((data) => {
     if (data.token) App.setToken(data.token);
-    App.loggedIn();
+    checkToken();
     $('.modal').modal('hide');
   });
 };
@@ -367,7 +371,7 @@ function showInfoModal() {
       <div class="modal-footer">
         <p>Made with ♥ by Steph Robinson</p>
       </div>
-    `);
+    `).removeClass('info');
   $('.modal').modal('show');
 }
 
