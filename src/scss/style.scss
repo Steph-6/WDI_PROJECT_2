@@ -3,16 +3,20 @@ body {
   font-family: "Trebuchet MS", Helvetica, sans-serif;
 }
 
-
-#map-canvas {
-  width: 100%;
-  height: 92vh;
-  margin: 0 auto;
-  margin-top: -41px;
+form-group {
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+  font-size: 10px;
+  width: 200px;
+  height: 10px;
+  border-radius: 0px;
 }
 
-#txt {
-  margin-left: -26px;
+navbar {
+  position: absolute;
+}
+
+button {
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
 }
 
 .btn-modal {
@@ -31,20 +35,15 @@ body {
   border-radius: 0px;
 }
 
-form-group {
-  font-family: "Trebuchet MS", Helvetica, sans-serif;
-  font-size: 10px;
-  width: 200px;
-  height: 10px;
-  border-radius: 0px;
+#map-canvas {
+  width: 100%;
+  height: 92vh;
+  margin: 0 auto;
+  margin-top: -41px;
 }
 
-navbar {
-  position: absolute;
-}
-
-button {
-  font-family: "Trebuchet MS", Helvetica, sans-serif;
+#message {
+  margin-right: -26px;
 }
 
 #info {
@@ -63,19 +62,19 @@ button {
   box-shadow: -1px 4px 142px 12px rgba(85,85,85,0.88);
 }
 
-@keyframes example {
-    33%   {border-radius: 10px;}
-    66%  {border-radius: 100px;}
-    99%  {border-radius: 10px;}
-}
-
-img[src="/images/Glow8.png"]{
-       border-radius:10px;
-       border:1px solid rgba(180,148,19,0.75) !important;
-       animation-name: example;
-animation-duration: 5s;
-animation-iteration-count: infinite;
-     }
+// @keyframes example {
+//     33%   {border-radius: 10px;}
+//     66%  {border-radius: 100px;}
+//     99%  {border-radius: 10px;}
+// }
+//
+// img[src="/images/Glow8.png"]{
+//        border-radius:10px;
+//        border:1px solid rgba(180,148,19,0.75) !important;
+//        animation-name: example;
+// animation-duration: 5s;
+// animation-iteration-count: infinite;
+//      }
 
 // .loading {
 //   position: absolute;

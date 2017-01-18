@@ -3,7 +3,7 @@ const google    = google;
 let directionsDisplay;
 const directionsService = new google.maps.DirectionsService();
 const App = App || {};
-// const User = require('../controllers/users')
+let markers = [];
 
 googleMap.mapSetup  = function() {
   directionsDisplay = new google.maps.DirectionsRenderer({
@@ -24,7 +24,7 @@ googleMap.mapSetup  = function() {
     zoomControl: true,
     scaleControl: true,
     disableDefaultUI: true,
-    styles: [{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#000000"},{"lightness":40}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#000000"},{"lightness":16}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":21}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":14}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":27},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":14}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":17}]}]
+    styles: [{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#000000"},{"lightness":40}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#000000"},{"lightness":16}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":21}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":14}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":27},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":14}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#0f2029"},{"lightness":17}]}]
   });
 
   directionsDisplay.setMap(this.map);
@@ -41,14 +41,6 @@ googleMap.mapSetup  = function() {
 
   // $('.glyphicon-user').toggle(usersNavShow,usersNavHide);
   // $('.road').on('click', showDirections);
-
-
-  //if there is a token go into the logged in state else go into the logged out state
-
-  // $('body').on('click', '.usersDelete', usersDelete);
-  // $('body').on('click', '.usersEdit', usersEdit);
-  // $('body').on('submit', '.usersUpdate', usersUpdate);
-
 };
 
 App.init = function(){
@@ -57,19 +49,18 @@ App.init = function(){
   $('.directions').on('click', calcRoute);
   $('.navbar-brand').on('click', showInfoModal);
   $('.home').on('click', locate);
-  $('.glyphicon-user').on('click', welcomeMessage);
+  $('.close-info').on('click', welcomeMessage);
 
   $('.usersNew').on('click', App.register);
   $('.usersLogin').on('click', App.login);
   $('.usersLogout').on('click', App.logout);
+
   $('body').on('submit', '.usersNew', App.handleRegisterForm);
   $('body').on('submit', '.usersLogin', App.handleLoginForm);
   $('body').on('submit', '.usersLocate', calcRouteHome);
   $('body').on('click', '.btn-locate', getLocation);
 
-
   if (App.getToken()) {
-
     App.loggedIn();
   } else {
     App.loggedOut();
@@ -78,7 +69,6 @@ App.init = function(){
 
 App.register           = function(e){
   if (e) e.preventDefault();
-  console.log('new');
   $('.modal-content').html(`
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -119,7 +109,6 @@ App.register           = function(e){
 };
 
 App.handleRegisterForm = function(e){
-  console.log('submitted');
   if (e) e.preventDefault();
   const data = $(this).serialize();
   $.ajax({
@@ -203,7 +192,6 @@ App.loggedOut = function(){
 };
 
 App.loggedIn    = function(){
-
   const token   = App.getToken();
   const payload = token.split('.')[1];
   const decoded = JSON.parse(window.atob(payload));
@@ -212,30 +200,29 @@ App.loggedIn    = function(){
   $.get(`http://localhost:3000/users/${userId}`)
    .done(data => App.currentUser = data);
 
-  //change glyphicon-user to username and 'it's'...
-  // $('#message').html(`Welcome ${App.currentUser.firstName}, it's`);
   $('.usersLogin').hide();
   $('.usersNew').hide();
   $('.usersLogout').show();
   $('.home').show();
+  welcomeMessage();
 };
 
 function welcomeMessage(){
   $('#message').html(`Hey ${App.currentUser.firstName} it\'s`);
-  $('.glyphicon-user').hide();
 }
 
 googleMap.getLights   = function() {
   $.get('http://localhost:3000/lights').done(data => {
     data.forEach(light => {
       googleMap.createMarkers(light);
-      //this.addHover(light, lightMarker);
     });
   });
 };
 
 googleMap.createMarkers = function(light, icon, anchor, size) {
-  new google.maps.Marker({
+  const maxZindex = google.maps.Marker.MAX_ZINDEX;
+  const zIndex = maxZindex + 1;
+  const marker = new google.maps.Marker({
     position: { lat: Number(light.lat), lng: Number(light.lng) },
     map: this.map,
     shape: { coords: [17,17,18],type: 'circle'},
@@ -244,23 +231,14 @@ googleMap.createMarkers = function(light, icon, anchor, size) {
       scaledSize: icon ? size : new google.maps.Size(5,5),
       origin: new google.maps.Point(0,0),
       anchor: icon ? anchor : new google.maps.Point(0,0),
-      zIndex: icon ? 1000000 : 5,
+      zIndex: icon ? zIndex : 5,
       optimized: false
     }
   });
-  // setTimeout(function() {
-  //   // $('.loading').hide();
-  //   showInfoModal();
-  // }, 2000);
-  // google.maps.event.addListener(marker,'mouseover',function(){
-  //   console.log('mouseover');
-  //   console.log(this.icon);
-  //   // $('img[src="'+this.icon+'"]').addClass('lightUp');
-  //   // console.log($('img[src="'+this.icon+'"]'));
-  // });
+  if (icon){
+    markers.push(marker);
+  }
 };
-
-
 
 googleMap.getCrimes = function() {
   showInfoModal();
@@ -285,11 +263,9 @@ googleMap.getCrimes = function() {
 googleMap.addInfoWindowForCrime = function(crime, crimeMarker) {
   google.maps.event.addListener(crimeMarker, 'click', () => {
     if (typeof this.infoWindow !== 'undefined') this.infoWindow.close();
-
     this.infoWindow = new google.maps.InfoWindow({
       content: getCrimeInfo(crime)
     });
-
     this.infoWindow.open(this.map, crimeMarker);
     this.map.setCenter(crimeMarker.getPosition());
     this.map.setZoom(16);
@@ -298,6 +274,7 @@ googleMap.addInfoWindowForCrime = function(crime, crimeMarker) {
 
 function calcRoute(e) {
   if (e) e.preventDefault();
+  clearMarkers();
   const start = document.getElementById('origin-input').value;
   const end = document.getElementById('destination-input').value;
   const request = {
@@ -327,8 +304,9 @@ function calcRoute(e) {
 
 function calcRouteHome(e) {
   if (e) e.preventDefault();
-  const start = $('#user_location').val();
-  const end   = App.currentUser.home;
+  clearMarkers();
+  const start   = $('#user_location').val();
+  const end     = App.currentUser.home;
   const request = {
     origin: start,
     destination: end,
@@ -357,7 +335,7 @@ function calcRouteHome(e) {
 function showInfoModal() {
   $('.modal-content').html(`
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close close-info" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h3 class="modal-title">Welcome to NightMapper</h4>
       </div>
       <div class="modal-body">
@@ -377,6 +355,44 @@ function autocomplete(input){
     new google.maps.LatLng(52.957699,-1.265336));
   const options       = { bounds: defaultBounds };
   new google.maps.places.Autocomplete(input, options);
+}
+
+function locate(e) {
+  if (e) e.preventDefault();
+  $('.modal-content').html(`
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Where are you at the moment?</h4>
+      </div>
+      <div class="modal-body">
+      <form method="post" action="/register" class="usersLocate">
+      <div class="form-group">
+        <input class="form-control" type="text" name="user[location]" id="user_location" placeholder="Starting Point">
+      </div>
+      <button type="submit" class="btn btn-primary btn-modal">Submit</button>
+      <button type="submit" class="btn btn-primary btn-modal btn-locate">Use My Current Location</button>
+      </form>
+    `);
+  $('.modal').modal('show');
+  autocomplete(document.getElementById('user_location'));
+}
+
+function getLocation(e){
+  if (e) e.preventDefault();
+  window.alert('Can\'t find your current location.');
+  $('.modal').modal('hide');
+
+  // const GeoMarker = new GeolocationMarker(googleMap);
+  // if (navigator.geolocation) {
+  //   navigator.geolocation.getCurrentPosition(function(position) {
+  //     const latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+  //     googleMap.setZoom(19);
+  //     // googleMap.setCenter(latlng);
+  //   });
+  // } else {
+  //   // Browser doesn't support Geolocation
+  //   console.log('failed to get location');
+  // }
 }
 
 $(googleMap.mapSetup.bind(googleMap));
@@ -433,82 +449,73 @@ function getCrimeInfo(crime) {
   return `<div id='info'>${cat}, ${month}</div>`;
 }
 
-function locate(e) {
-  if (e) e.preventDefault();
-  $('.modal-content').html(`
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Where are you at the moment?</h4>
-      </div>
-      <div class="modal-body">
-      <form method="post" action="/register" class="usersLocate">
-      <div class="form-group">
-        <input class="form-control" type="text" name="user[location]" id="user_location" placeholder="Starting Point">
-      </div>
-      <button type="submit" class="btn btn-primary btn-modal">Submit</button>
-      <button type="submit" class="btn btn-primary btn-modal btn-locate">Use My Current Location</button>
-      </form>
-    `);
-  $('.modal').modal('show');
-  autocomplete(document.getElementById('user_location'));
+function clearMarkers() {
+  setMapOnAll(null);
 }
 
-function getLocation(e){
-  if (e) e.preventDefault();
-  window.alert('Can\'t find your current location.');
-  $('.modal').modal('hide');
-
-  // const GeoMarker = new GeolocationMarker(googleMap);
-  // if (navigator.geolocation) {
-  //   navigator.geolocation.getCurrentPosition(function(position) {
-  //     const latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-  //     googleMap.setZoom(19);
-  //     // googleMap.setCenter(latlng);
-  //   });
-  // } else {
-  //   // Browser doesn't support Geolocation
-  //   console.log('failed to get location');
-  // }
+function setMapOnAll(googleMap) {
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(googleMap);
+  }
 }
+// function putHomeMarker(){
+//   const home = App.currentUser.home;
+//   googleMap.createMarkers({
+//     lat: home.lat(),
+//     lng: home.lng()
+//   }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(50,50));
+// }
 
-// draw my route
-// googleMap.addHover = function(light, lightMarker) {
-//   google.maps.event.addListener(lightMarker, 'mouseover', () => {
-//     lightMarker = new google.maps.Marker({
-//       position: { lat: Number(light.lat), lng: Number(light.lng) },
+// googleMap.addHover = function(crime, crimeMarker) {
+//   google.maps.event.addListener(crimeMarker, 'mouseover', () => {
+//     removeMarker(crimeMarker);
+//     crimeMarker = new google.maps.Marker({
+//       position: { lat: Number(crime.lat), lng: Number(crime.lng) },
 //       map: this.map,
 //       icon: {
-//         url: '/images/Glow8.png',
-//         scaledSize: new google.maps.Size(7,7),
+//         url: '/images/red2.png',
+//         scaledSize: new google.maps.Size(50,50),
+//         origin: new google.maps.Point(50,50),
+//         anchor: new google.maps.Point(0,0)
+//       }
+//     });
+//     this.addInfoWindowForCrime(crime, crimeMarker);
+//   });
+//   google.maps.event.addListener(crimeMarker, 'mouseout', () => {
+//     removeMarker(crimeMarker);
+//     console.log('mouseout');
+//     crimeMarker = new google.maps.Marker({
+//       position: { lat: Number(crime.lat), lng: Number(crime.lng) },
+//       map: this.map,
+//       icon: {
+//         url: '/images/red2.png',
+//         scaledSize: new google.maps.Size(5,5),
 //         origin: new google.maps.Point(0,0),
 //         anchor: new google.maps.Point(0,0)
 //       }
 //     });
+//     this.addInfoWindowForCrime(crime, crimeMarker);
 //   });
 // };
+//
+// or settimeout to mouse enter function
+//
+// function removeMarker(marker){
+//   console.log('removing');
+//   marker.setMap(null);
+// }
 
-  // setTimeout(function() {
-  //   lightMarker = new google.maps.Marker({
-  //     position: { lat: Number(light.lat), lng: Number(light.lng) },
-  //     map: this.map,
-  //     icon: {
-  //       url: '/images/Glow10.png',
-  //       scaledSize: new google.maps.Size(5,5),
-  //       origin: new google.maps.Point(0,0),
-  //       anchor: new google.maps.Point(0,0)
-  //     }
-  //   });
-  // }, 200);
+//draw route function
 
-  // google.maps.event.addListener(lightMarker, 'mouseleave', () => {
-  //   lightMarker = new google.maps.Marker({
-  //     position: { lat: Number(light.lat), lng: Number(light.lng) },
-  //     map: this.map,
-  //     icon: {
-  //       url: '/images/Glow2.png',
-  //       scaledSize: new google.maps.Size(5,5),
-  //       origin: new google.maps.Point(0,0),
-  //       anchor: new google.maps.Point(0,0)
-  //     }
-  //   });
-  // });
+// setTimeout(function() {
+//   lightMarker = new google.maps.Marker({
+//     position: { lat: Number(light.lat), lng: Number(light.lng) },
+//     map: this.map,
+//     icon: {
+//       url: '/images/Glow10.png',
+//       scaledSize: new google.maps.Size(5,5),
+//       origin: new google.maps.Point(0,0),
+//       anchor: new google.maps.Point(0,0)
+//     }
+//   });
+// }, 200);
