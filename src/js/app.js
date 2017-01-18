@@ -60,11 +60,6 @@ App.init = function(){
   $('body').on('submit', '.usersLocate', calcRouteHome);
   $('body').on('click', '.btn-locate', getLocation);
 
-  App.checkToken();
-};
-
-App.checkToken = function(){
-  console.log('checking');
   if (App.getToken()) {
     console.log('loggedin');
     App.loggedIn();
@@ -74,7 +69,18 @@ App.checkToken = function(){
   }
 };
 
-App.register           = function(e){
+// App.checkToken = function(){
+//   console.log('checking');
+//   if (App.getToken()) {
+//     console.log('loggedin');
+//     App.loggedIn();
+//   } else {
+//     console.log('loggedout');
+//     App.loggedOut();
+//   }
+// };
+
+App.register = function(e){
   if (e) e.preventDefault();
   $('.modal-content').html(`
       <div class="modal-header">
@@ -126,7 +132,7 @@ App.handleRegisterForm = function(e){
   }).done((data) => {
     if (data.token) App.setToken(data.token);
     $('.modal').modal('hide');
-    App.checkToken();
+    App.loggedIn();
   });
 };
 
@@ -180,9 +186,11 @@ App.handleLoginForm = function(e){
     data,
     beforeSend: App.setRequestHeader
   }).done((data) => {
-    if (data.token) App.setToken(data.token);
-    $('.modal').modal('hide');
-    App.checkToken();
+    if (data.token){
+      App.setToken(data.token);
+      $('.modal').modal('hide');
+      App.loggedIn();
+    }
   });
 };
 
@@ -219,7 +227,7 @@ App.loggedIn    = function(){
 };
 
 function welcomeMessage(){
-  $('#message').html(`Hey ${App.currentUser.firstName} it\'s`);
+  $('#message').html(`Hi ${App.currentUser.firstName} it\'s`);
 }
 
 googleMap.getLights   = function() {
