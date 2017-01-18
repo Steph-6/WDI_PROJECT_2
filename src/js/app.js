@@ -103,7 +103,7 @@ App.register           = function(e){
           <button type="submit" class="btn btn-primary btn-modal" value="register">Register</button>
         </form>
       </div>
-    `);
+    `).removeClass('info');
   $('.modal').modal('show');
   autocomplete(document.getElementById('user_home'));
 };
@@ -158,7 +158,7 @@ App.login = function(e){
       </div>
       <button type="submit" class="btn btn-primary btn-modal">Login</button>
       </form>
-    `);
+    `).removeClass('info');
   $('.modal').modal('show');
 };
 
@@ -263,14 +263,25 @@ googleMap.getCrimes = function() {
 googleMap.addInfoWindowForCrime = function(crime, crimeMarker) {
   google.maps.event.addListener(crimeMarker, 'click', () => {
     if (typeof this.infoWindow !== 'undefined') this.infoWindow.close();
-    this.infoWindow = new google.maps.InfoWindow({
-      content: getCrimeInfo(crime)
-    });
-    this.infoWindow.open(this.map, crimeMarker);
+    // this.infoWindow = new google.maps.InfoWindow({
+    //   content: getCrimeInfo(crime)
+    // });
+    this.infoWindow = showCrimeModal(crime);
+    // this.infoWindow.open(this.map, crimeMarker);
     this.map.setCenter(crimeMarker.getPosition());
     this.map.setZoom(16);
   });
 };
+
+function showCrimeModal(crime) {
+  $('.modal-content').html(`
+      <div class="modal-body">
+        <button type="button" class="close close-info" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">${getCrimeInfo(crime)}</h4>
+      </div>
+    `).addClass('info');
+  $('.modal').modal('show');
+}
 
 function calcRoute(e) {
   if (e) e.preventDefault();
@@ -287,19 +298,28 @@ function calcRoute(e) {
     if (status === 'OK') {
       directionsDisplay.setDirections(result);
       const leg = result.routes[0].legs[0];
+      showDirections(leg);
       googleMap.createMarkers({
         lat: leg.start_location.lat(),
         lng: leg.start_location.lng()
-      }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(50,50));
+      }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(45,45));
       googleMap.createMarkers({
         lat: leg.end_location.lat(),
         lng: leg.end_location.lng()
-      }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(50,50));
-
+      }, './images/marker.png', new google.maps.Point(22,16), new google.maps.Size(45,45));
     } else {
       window.alert('Directions request failed due to ' + status);
     }
   });
+}
+
+function showDirections(leg){
+  console.log(leg.distance.text);
+  $('.modal-content').html(`
+    Distance: ${leg.distance.text}</br>
+    Time: ${leg.duration.text}
+  `).addClass('info').css('padding', '20px');
+  $('.modal').modal('show');
 }
 
 function calcRouteHome(e) {
@@ -317,6 +337,7 @@ function calcRouteHome(e) {
     if (status === 'OK') {
       directionsDisplay.setDirections(result);
       const leg = result.routes[0].legs[0];
+      showDirections(leg);
       googleMap.createMarkers({
         lat: leg.start_location.lat(),
         lng: leg.start_location.lng()
@@ -446,7 +467,8 @@ function getCrimeInfo(crime) {
     month = 'December';
   }
   month = 'in ' + month + ' ' + crime.month.charAt(0) + crime.month.charAt(1) + crime.month.charAt(2) + crime.month.charAt(3) + '.';
-  return `<div id='info'>${cat}, ${month}</div>`;
+  // return `<div id='info'>${cat}, ${month}</div>`;
+  return `${cat}, ${month}`;
 }
 
 function clearMarkers() {
