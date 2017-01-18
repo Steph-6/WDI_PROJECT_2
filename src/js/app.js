@@ -140,6 +140,7 @@ App.setToken = function(token){
 };
 
 App.getToken = function(){
+  console.log('getting token');
   return window.localStorage.getItem('token');
 };
 
