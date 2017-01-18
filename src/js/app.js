@@ -186,7 +186,7 @@ App.handleLoginForm = function(e){
   });
 };
 
-App.logout    = function(e){
+App.logout = function(e){
   if (e) e.preventDefault();
   App.removeToken();
   App.loggedOut();
@@ -198,7 +198,6 @@ App.loggedOut = function(){
   $('.usersNew').show();
   $('.usersLogout').hide();
   $('.home').hide();
-  // App.checkToken();
 };
 
 App.loggedIn    = function(){
@@ -209,6 +208,8 @@ App.loggedIn    = function(){
 
   $.get(`http://localhost:3000/users/${userId}`)
    .done(data => App.currentUser = data);
+
+  console.log(App.currentUser);
 
   $('.usersLogin').hide();
   $('.usersNew').hide();
