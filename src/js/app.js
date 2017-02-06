@@ -217,17 +217,16 @@ App.loggedIn    = function(){
   $.get(`http://localhost:3000/users/${userId}`)
    .done(data => App.currentUser = data);
 
-  console.log(App.currentUser);
-
   $('.usersLogin').hide();
   $('.usersNew').hide();
   $('.usersLogout').show();
   $('.home').show();
-  welcomeMessage();
+  const name = App.currentUser.firstName;
+  welcomeMessage(name);
 };
 
-function welcomeMessage(){
-  $('#message').html(`Hi ${App.currentUser.firstName} it\'s`);
+function welcomeMessage(name){
+  $('#message').html(`Hi ${name} it\'s`);
 }
 
 googleMap.getLights   = function() {
