@@ -44,7 +44,7 @@ googleMap.mapSetup  = function() {
 };
 
 App.init = function(){
-  App.url = 'http://localhost:7000/';
+  App.url = `${window.location.origin}`;
 
   $('.directions').on('click', calcRoute);
   $('.navbar-brand').on('click', showInfoModal);
@@ -214,7 +214,7 @@ App.loggedIn    = function(){
   const decoded = JSON.parse(window.atob(payload));
   const userId  = decoded.userId;
 
-  $.get(`http://localhost:3000/users/${userId}`)
+  $.get(`${window.location.origin}/users/${userId}`)
    .done(data => App.currentUser = data);
 
   $('.usersLogin').hide();
@@ -230,7 +230,7 @@ function welcomeMessage(name){
 }
 
 googleMap.getLights   = function() {
-  $.get('http://localhost:3000/lights').done(data => {
+  $.get(`${window.location.origin}/lights`).done(data => {
     data.forEach(light => {
       googleMap.createMarkers(light);
     });
@@ -261,7 +261,7 @@ googleMap.createMarkers = function(light, icon, anchor, size) {
 googleMap.getCrimes = function() {
   showInfoModal();
   $('.loading').show();
-  $.get('http://localhost:3000/crimes').done(data => {
+  $.get(`${window.location.origin}/crimes`).done(data => {
     data.forEach(crime => {
       const crimeMarker = new google.maps.Marker({
         position: { lat: Number(crime.lat), lng: Number(crime.lng) },
