@@ -58,3 +58,5 @@ gulp.task('default', ['sass', 'es6', 'images', 'fonts', 'serve'], () => {
   gulp.watch('src/fonts/**/*.{eot,svg,ttf,woff,woff2}', ['fonts']);
   gulp.watch('**/*.html', browserSync.reload);
 });
+
+gulp.task('deploy', ['sass', 'es6', 'images', 'fonts']);
