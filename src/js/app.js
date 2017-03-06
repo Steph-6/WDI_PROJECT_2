@@ -214,19 +214,20 @@ App.loggedIn    = function(){
   const decoded = JSON.parse(window.atob(payload));
   const userId  = decoded.userId;
 
-  $.get(`${window.location.origin}/users/${userId}`)
-   .done(data => App.currentUser = data);
+  // $.get(`${window.location.origin}/users/${userId}`)
+  //  .done(data => App.currentUser = data);
 
   $('.usersLogin').hide();
   $('.usersNew').hide();
   $('.usersLogout').show();
   $('.home').show();
-  const name = App.currentUser.firstName;
-  welcomeMessage(name);
+  console.log(App.currentUser);
+  // const name = App.currentUser.firstName;
+  // welcomeMessage();
 };
 
-function welcomeMessage(name){
-  $('#message').html(`Hi ${name} it\'s`);
+function welcomeMessage(){
+  $('#message').html(`Hi ${App.currentUser.firstName} it\'s`);
 }
 
 googleMap.getLights   = function() {
